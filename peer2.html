@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Screen Sharing con PeerJS</title>
+    <style>
+      #local-video, #remote-video {
+        width: 100%;
+        height: auto;
+        max-width: 500px;
+        margin: 20px auto;
+        display: block;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Screen Sharing con PeerJS</h1>
+    <video id="local-video" muted autoplay></video>
+    <video id="remote-video" autoplay></video>
+    
+    <script src="https://unpkg.com/peerjs@1.4.7/dist/peerjs.min.js"></script>
+    <script>
+      var peer = new Peer('juan101', { // inicializa el primer cliente con el ID 'cliente1'
+      host: 'localhost',
+      port: 3000,
+      path: '/peerjs'
+    }); // crea un nuevo objeto Peer
+      
+      // Solicita permiso al usuario para capturar la pantalla
+      navigator.mediaDevices.getDisplayMedia({ video: true }).then(function(stream) {
+        console.log('Se capturó la pantalla');
+        
+        // Agrega la MediaStream a un elemento de video para poder visualizarla (opcional)
+        var localVideo = document.getElementById('local-video');
+        localVideo.srcObject = stream;
+     
+        // Envía la MediaStream al otro extremo de la conexión
+        var conn = peer.connect('juan100');
+        var call = peer.call('juan100', stream);
+        console.log(call)
+      });
+      
+      // Espera a recibir una llamada entrante
+      peer.on('call', function(call) {
+        console.log('Recibida una llamada entrante');
+        
+        // Responde la llamada y agrega la MediaStream entrante a un elemento de video para poder visualizarla
+        call.answer();
+        call.on('stream', function(stream) {
+          var remote = document.getElementById('remote-video');
+        remote.srcObject = stream;
+     
+  });
+      });
+    </script>
+  </body>
+</html>
